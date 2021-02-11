@@ -1,14 +1,16 @@
-const e = require('express')
 const admin = require('firebase-admin')
 const { standardErrorHandler } = require('../../common')
 
-const ingredienteCollection = admin.firestore().collection('ingrediente')
+const ingredienteCollection = admin.firestore().collection('ingredient')
 
 const getIngredients = (_, res) => {
     ingredienteCollection.get()
     .then(querySnapshot => {
 
-        res.json(querySnapshot.docs.map(doc => doc.data()))
+        const ingredientsList = querySnapshot.docs
+            .map(doc => ({...doc.data(), id: doc.id}))
+
+        res.json(ingredientsList)
 
     })
     .catch(standardErrorHandler(res))
@@ -30,7 +32,7 @@ const addIngredient = (req, res) => {
         storage
     })
     .then(_ => {
-        res.status(200).send('Ingredient successfully added.')
+        res.status(200).send('Ingrediente adicionado com sucesso.')
     })
     .catch(standardErrorHandler(res))
 }
@@ -41,12 +43,16 @@ const getIngredient = (req, res) => {
     ingredienteCollection.doc(id).get()
     .then(documentSnapshot => {
         if(documentSnapshot.exists){
-            const foundIngredient = documentSnapshot.data()
+            
+            const foundIngredient = {
+                ...documentSnapshot.data(),
+                id: documentSnapshot.id
+            }
 
             res.json(foundIngredient)
         }
         else {
-            res.status(404).send(`Couldn\'t find document with Id ${id}`)
+            res.status(404).send(`Não foi possível encontrar o ingrediente com o Id ${id}.`)
         }     
     })
     .catch(err => {

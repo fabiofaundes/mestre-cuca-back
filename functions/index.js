@@ -6,15 +6,26 @@ const functions = require("firebase-functions");
 const admin = require('firebase-admin')
 admin.initializeApp()
 
-const app = express()
-app.use(bodyParser.json())
-app.use(bodyParser.urlencoded())
+const ingredienteApp = express()
+ingredienteApp.use(bodyParser.json())
+ingredienteApp.use(bodyParser.urlencoded())
+
+const storageApp = express()
+storageApp.use(bodyParser.json())
+storageApp.use(bodyParser.urlencoded())
 
 const ingredientFunctions = require('./features/ingredients')
+const storageFunctions = require('./features/storages')
 
-app.get('/:id', ingredientFunctions.getIngredient)
-app.get('/', ingredientFunctions.getIngredients)
-app.post('/', ingredientFunctions.addIngredient)
+ingredienteApp.get('/:id', ingredientFunctions.getIngredient)
+ingredienteApp.get('/', ingredientFunctions.getIngredients)
+ingredienteApp.post('/', ingredientFunctions.addIngredient)
 
-exports.ingredients = functions.https.onRequest(app)
+storageApp.post('/', storageFunctions.addStorage)
+storageApp.get('/', storageFunctions.getStorages)
+storageApp.get('/:id', storageFunctions.getStorage)
+storageApp.put('/:id', storageFunctions.putStorage)
+
+exports.ingredients = functions.https.onRequest(ingredienteApp)
+exports.storages = functions.https.onRequest(storageApp)
 
